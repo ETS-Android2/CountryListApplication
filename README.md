@@ -2,8 +2,8 @@
 Aplicaci?n Android
 
 ## ? Screenshots
-| Demo 1 | Demo 2 |
-|:-:|:-:|
+| Demo 1|
+|:-:|
 | ![1](demo/demo-1.gif?raw=true) |
 
 
