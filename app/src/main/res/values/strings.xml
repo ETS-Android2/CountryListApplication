@@ -1,7 +1,9 @@
 <resources>
     <string name="app_name">Country List Application</string>
-    <string name="str_no_internet">No hay Internet... la aplicación está trabajando Offline.</string>
+    <string name="str_no_internet">No tiene conexión a internet.</string>
     <string name="str_error_server">Error del servidor, intente nuevamente...</string>
     <string name="str_name">Fabián Moreno</string>
+    <string name="list_is_empty">List is empty</string>
+    <string name="text_exit">¿Desea salir de la aplicación?</string>
 
 </resources>

@@ -31,5 +31,9 @@
             android:layout_height="match_parent"
             android:clipToPadding="false"
             android:padding="3dp"/>
+        <include
+            android:id="@+id/include"
+            layout="@layout/empty_view"
+            android:visibility="gone" />
     </LinearLayout>
 </RelativeLayout>

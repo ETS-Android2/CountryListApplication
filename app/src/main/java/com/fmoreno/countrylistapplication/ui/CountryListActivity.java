@@ -17,6 +17,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -50,6 +51,9 @@ public class CountryListActivity extends AppCompatActivity implements RecyclerVi
     RecyclerView rv_countries;
     RecyclerViewCountriesAdapter recyclerViewCountriesAdapter;
 
+    private View include;
+    private ImageView iv_refresh;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,20 +70,21 @@ public class CountryListActivity extends AppCompatActivity implements RecyclerVi
             search_bar = findViewById(R.id.search_bar);
             rv_countries = findViewById(R.id.rv_countries);
             progressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleLarge);
+            include = findViewById(R.id.include);
+            include.setVisibility(View.GONE);
+            iv_refresh = findViewById(R.id.iv_refresh);
+            iv_refresh.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    callGetCountriesApi();
+                }
+            });
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(100, 100);
             params.addRule(RelativeLayout.CENTER_IN_PARENT);
             progressBar.setVisibility(View.GONE);
             rlCountriesList.addView(progressBar, params);
 
             recyclerViewCountriesAdapter = new RecyclerViewCountriesAdapter(this, this);
-
-
-            /*layoutManager =
-                    new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-            rv_countries.setLayoutManager(layoutManager);
-            rv_countries.setHasFixedSize(true);
-            rv_countries.clearOnScrollListeners();*/ //clear scrolllisteners
-
 
         }catch (Exception ex){
             Log.e("initView", ex.toString());
@@ -146,6 +151,8 @@ public class CountryListActivity extends AppCompatActivity implements RecyclerVi
             Toast.makeText(this,
                     getResources().getString(R.string.str_no_internet),
                     Toast.LENGTH_SHORT).show();
+            include.setVisibility(View.VISIBLE);
+            search_bar.setVisibility(View.GONE);
             return;
         }
 
@@ -159,10 +166,6 @@ public class CountryListActivity extends AppCompatActivity implements RecyclerVi
 
         WebApiRequest webApiRequest = new WebApiRequest(Request.Method.GET,
                 ws_url, ReqSuccessListener(), ReqErrorListener());
-        /*webApiRequest.setRetryPolicy(new DefaultRetryPolicy(
-                TIMEOUT,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));*/
         webApiRequest.setRetryPolicy(new RetryPolicy() {
             @Override
             public int getCurrentTimeout() {
@@ -204,9 +207,13 @@ public class CountryListActivity extends AppCompatActivity implements RecyclerVi
 
                     if (countriesList != null &&
                             countriesList.size() > 0) {
-                            recyclerViewCountriesAdapter.addMovies(countriesList);
+                        include.setVisibility(View.GONE);
+                        search_bar.setVisibility(View.VISIBLE);
+                        recyclerViewCountriesAdapter.addMovies(countriesList);
                     } else {
                         Log.e(TAG, "list empty==");
+                        include.setVisibility(View.VISIBLE);
+                        search_bar.setVisibility(View.GONE);
                     }
 
                 } catch (Exception e) {
@@ -229,6 +236,8 @@ public class CountryListActivity extends AppCompatActivity implements RecyclerVi
                 hideProgress();
                 Log.e("volley error", "volley error");
                 Toast.makeText(getApplication(), getResources().getString(R.string.str_error_server), Toast.LENGTH_SHORT).show();
+                include.setVisibility(View.VISIBLE);
+                search_bar.setVisibility(View.GONE);
             }
         };
     }
@@ -254,7 +263,7 @@ public class CountryListActivity extends AppCompatActivity implements RecyclerVi
             new AlertDialog.Builder(this)
                     .setIcon(R.drawable.ic_action_info)
                     .setTitle("Salir")
-                    .setMessage("?Desea salir de la aplicaci?n?")
+                    .setMessage(Utils.getStringFromResource(R.string.text_exit, this))
                     .setCancelable(false)
                     .setPositiveButton("Si", new DialogInterface.OnClickListener() {
                         @Override
