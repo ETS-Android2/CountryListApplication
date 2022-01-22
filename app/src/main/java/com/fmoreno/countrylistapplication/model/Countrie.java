@@ -1,11 +1,24 @@
 package com.fmoreno.countrylistapplication.model;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import java.util.ArrayList;
 
 public class Countrie {
+    @SerializedName("name")
+    @Expose
     public String name;
+
+    @SerializedName("capital")
+    @Expose
     public String capital;
+    @SerializedName("region")
+    @Expose
     public String region;
+
+    @SerializedName("latlng")
+    @Expose
     public ArrayList<Double> latlng;
 
     public String getName() {

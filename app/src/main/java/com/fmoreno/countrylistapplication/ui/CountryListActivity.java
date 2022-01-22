@@ -27,8 +27,12 @@ import com.fmoreno.countrylistapplication.adapter.RecyclerViewCountriesAdapter;
 import com.fmoreno.countrylistapplication.interfaces.RecyclerViewInterface;
 import com.fmoreno.countrylistapplication.internet.WebApiRequest;
 import com.fmoreno.countrylistapplication.model.Countrie;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import utils.Utils;
@@ -199,7 +203,7 @@ public class CountryListActivity extends AppCompatActivity implements RecyclerVi
      * @return
      */
 
-    private List<Countrie> countriesList = null;
+    private List<Countrie>  countriesList = null;
 
     private Response.Listener<String> ReqSuccessListener() {
         return new Response.Listener<String>() {
@@ -209,7 +213,12 @@ public class CountryListActivity extends AppCompatActivity implements RecyclerVi
                     hideProgress();
                     pageNumber++;
 
-                    countriesList = (ArrayList<Countrie>) Utils.jsonToPojo(response, Countrie.class);
+                    //countriesList =  (Countrie[])Utils.jsonToPojo(response, Countrie[].class);
+
+                    Type collectionType = new TypeToken<List<Countrie>>(){}.getType();
+                    countriesList = (List<Countrie>) new Gson()
+                            .fromJson( response , collectionType);
+
                     if (countriesList != null &&
                             countriesList.size() > 0) {
                             recyclerViewCountriesAdapter.addMovies(countriesList);

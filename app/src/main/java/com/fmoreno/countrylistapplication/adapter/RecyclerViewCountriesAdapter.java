@@ -56,6 +56,10 @@ public class RecyclerViewCountriesAdapter extends RecyclerView.Adapter<RecyclerV
             }
         });
 
+        holder.tv_name.setText(countriesList.get(position).getName());
+        holder.tv_capital.setText(countriesList.get(position).getCapital());
+        holder.tv_region.setText(countriesList.get(position).getRegion());
+
         holder.itemView.startAnimation(startAnimation);
     }
 
