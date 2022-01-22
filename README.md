@@ -1,18 +1,18 @@
 # CountryList App
 Aplicaci?n Android
 
-## ? Screenshots
+## ✨  Screenshots
 | Demo 1|
 |:-:|
 | ![1](demo/demo-1.gif?raw=true) |
 
 
-## ? Caracter?sticas
+## 🌟 Características
 *   Listado de paises
 *   Filtro por nombre de pais
 *   Visualizar ubicaci?n del pais en Google Maps
 
-## ? Nuevas mejoras a futuro
+## 🌟 Nuevas mejoras a futuro
 *   Agregar favoritos
 *   Mostrar detalle de cada pa?s
 *   Mostrar bandera de cada pa?s    
@@ -23,7 +23,7 @@ Aplicaci?n Android
 *   Java JDK
 
 
-## ? Bibliotecas utilizadas
+## 📃 Bibliotecas utilizadas
 *   [AndroidX](https://developer.android.com/jetpack/androidx/) - Biblioteca de soporte de Android
 *   [Volley](https://github.com/google/volley) - Cliente HTTP con seguridad de tipos para Android y Java de Google.
 *   [Gson](https://github.com/google/gson) - Para serializaci?n / deserializaci?n de objetos Java en JSON y viceversa
@@ -31,7 +31,7 @@ Aplicaci?n Android
 #### 1. API Utilizada
 *   [RestCountries] (https://restcountries.com/#api-endpoints-v2-all) - API
 
-## ? Licencia
+## 📝 Licencia
 Este proyecto se publica bajo la licencia MIT.
 Consulte [LICENSE](./LICENSE) para obtener m?s detalles.
 
