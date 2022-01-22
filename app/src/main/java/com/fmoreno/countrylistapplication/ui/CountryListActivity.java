@@ -1,14 +1,19 @@
 package com.fmoreno.countrylistapplication.ui;
 
 import static com.fmoreno.countrylistapplication.internet.WebServicesConstant.BASE_URL_APPLICATION;
-import static com.fmoreno.countrylistapplication.internet.WebServicesConstant.TIMEOUT;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -16,7 +21,6 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.RetryPolicy;
@@ -32,7 +36,6 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import utils.Utils;
@@ -43,20 +46,9 @@ public class CountryListActivity extends AppCompatActivity implements RecyclerVi
 
     RelativeLayout rlCountriesList;
     private ProgressBar progressBar;
+    SearchView search_bar;
     RecyclerView rv_countries;
     RecyclerViewCountriesAdapter recyclerViewCountriesAdapter;
-
-    LinearLayoutManager layoutManager;
-
-    //For Load more functionality
-    private int previousTotal = 0;
-    private boolean loading = true;
-    private int visibleThreshold = 2;
-    private int firstVisibleItem = 0;
-    private int visibleItemCount = 0;
-    private int totalItemCount = 0;
-    private int pageNumber = 1;
-
 
 
     @Override
@@ -71,6 +63,7 @@ public class CountryListActivity extends AppCompatActivity implements RecyclerVi
     private void initView() {
         try{
             rlCountriesList = findViewById(R.id.rlCountriesList);
+            search_bar = findViewById(R.id.search_bar);
             rv_countries = findViewById(R.id.rv_countries);
             progressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleLarge);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(100, 100);
@@ -78,12 +71,15 @@ public class CountryListActivity extends AppCompatActivity implements RecyclerVi
             progressBar.setVisibility(View.GONE);
             rlCountriesList.addView(progressBar, params);
 
-            layoutManager =
+            recyclerViewCountriesAdapter = new RecyclerViewCountriesAdapter(this, this);
+
+
+            /*layoutManager =
                     new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
             rv_countries.setLayoutManager(layoutManager);
             rv_countries.setHasFixedSize(true);
-            rv_countries.clearOnScrollListeners(); //clear scrolllisteners
-            recyclerViewCountriesAdapter = new RecyclerViewCountriesAdapter(this, this);
+            rv_countries.clearOnScrollListeners();*/ //clear scrolllisteners
+
 
         }catch (Exception ex){
             Log.e("initView", ex.toString());
@@ -93,31 +89,20 @@ public class CountryListActivity extends AppCompatActivity implements RecyclerVi
     private void initOperation() {
         try{
             rv_countries.setAdapter(recyclerViewCountriesAdapter);
-
-            rv_countries.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            rv_countries.setLayoutManager(new LinearLayoutManager(this));
+            rv_countries.setHasFixedSize(true);
+            rv_countries.clearOnScrollListeners();
+            search_bar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
-                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                    super.onScrolled(recyclerView, dx, dy);
-                    if (dy > 0) {
-                        visibleItemCount = recyclerView.getChildCount();
-                        totalItemCount = layoutManager.getItemCount();
-                        firstVisibleItem = layoutManager.findFirstVisibleItemPosition();
+                public boolean onQueryTextSubmit(String query) {
+                    recyclerViewCountriesAdapter.getFilter().filter(query);
+                    return true;
+                }
 
-                        if (loading) {
-                            if (totalItemCount > previousTotal) {
-                                loading = false;
-                                previousTotal = totalItemCount;
-                            }
-                        }
-                        if (!loading && (totalItemCount - visibleItemCount)
-                                <= (firstVisibleItem + visibleThreshold)) {
-                            // End has been reached
-                            Log.i("InfiniteScrollListener", "End reached");
-
-                            callGetCountriesApi();
-                            loading = true;
-                        }
-                    }
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    recyclerViewCountriesAdapter.getFilter().filter(newText);
+                    return true;
                 }
             });
         }catch (Exception ex){
@@ -178,7 +163,6 @@ public class CountryListActivity extends AppCompatActivity implements RecyclerVi
                 TIMEOUT,
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));*/
-
         webApiRequest.setRetryPolicy(new RetryPolicy() {
             @Override
             public int getCurrentTimeout() {
@@ -211,7 +195,6 @@ public class CountryListActivity extends AppCompatActivity implements RecyclerVi
                 Log.e("movie list_response", response);
                 try {
                     hideProgress();
-                    pageNumber++;
 
                     //countriesList =  (Countrie[])Utils.jsonToPojo(response, Countrie[].class);
 
@@ -251,7 +234,53 @@ public class CountryListActivity extends AppCompatActivity implements RecyclerVi
     }
 
     @Override
-    public void onItemClick(Countrie result, View view) {
+    public void onItemClick(Countrie countrie, View view) {
+        String coordinates = "geo:" +
+                countrie.getLatlng().get(0) + "," +
+                countrie.getLatlng().get(1) + "?q=" +
+                countrie.getName();
+        Uri gmmIntentUri = Uri.parse(coordinates);
+        Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+        mapIntent.setPackage("com.google.android.apps.maps");
+        if (mapIntent.resolveActivity(getPackageManager()) != null) {
+            startActivity(mapIntent);
+        }
+    }
 
+    boolean onBack = false;
+    @Override
+    public void onBackPressed() {
+        if(!onBack){
+            new AlertDialog.Builder(this)
+                    .setIcon(R.drawable.ic_action_info)
+                    .setTitle("Salir")
+                    .setMessage("?Desea salir de la aplicaci?n?")
+                    .setCancelable(false)
+                    .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            onBack = true;
+                            exitApp();
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            onBack = false;
+                        }
+                    }).show();
+        } else {
+            try{
+                System.exit(0);
+            }catch (Exception ex){
+                Log.e("Dialog", ex.toString());
+            }
+            super.onBackPressed();
+        }
+
+    }
+
+    private void exitApp(){
+        onBackPressed();
     }
 }
